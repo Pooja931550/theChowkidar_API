@@ -1,20 +1,25 @@
 from rest_framework import serializers
-from theChowkidarApp.models import User, AccountVerify
-from theChowkidarApp.helper import send_otp_via_email
-import random
+from theChowkidarApp.models import User
 
-class AccountVerifySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = AccountVerify
-        fields = ['email']
-
-    def create(self, validated_data):
-        otp = random.randint(1000, 9999)
-        if send_otp_via_email(validated_data['email'], otp):
-            obj = AccountVerify.objects.update_or_create(email=validated_data['email'], otp=otp)
-            return obj
-
-class RegisterSerializer(serializers.ModelSerializer):
+class SendOTPSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['email', 'password']
+        fields = ['email']
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'name', 'email', 'phone_no', 'profile_pic']
+
+class RegisterVaiPhoneSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['phone_no', 'password']
+
+class UpdateProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['name', 'profile_pic']
+
+class ForgetPasswordSerializer(serializers.Serializer):
+   pass

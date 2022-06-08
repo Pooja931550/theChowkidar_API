@@ -13,7 +13,9 @@ class User(AbstractUser):
     password = models.CharField(max_length=250, null=True, blank=True)
     profile_pic = models.ImageField(upload_to='media/user/profile/%Y/%m/%d/', null=True, blank=True)
     otp = models.IntegerField(default=0)
+    otp_expire = models.BooleanField(default=False)
     is_verified = models.BooleanField(default=False)
+    is_created = models.BooleanField(default=False)
     role = models.CharField(max_length=150, default='subscriber')
     
     USERNAME_FIELD = 'email'
@@ -22,14 +24,6 @@ class User(AbstractUser):
     objects = UserManager()
 
     def __str__(self):
-        return self.name
-
-class AccountVerify(models.Model):
-    email = models.EmailField(max_length=150, null=True, blank=True)
-    otp = models.IntegerField(default=0)
-    is_verified = models.BooleanField(default=False)
-
-    def __str__(self):
-        return self.email
+        return str(self.email)
 
 
