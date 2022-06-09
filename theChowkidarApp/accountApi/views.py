@@ -17,31 +17,20 @@ class SendOtpViaEmailAPIView(APIView):
             user_obj = None
         
         if user_obj is not None:
-            if user_obj.is_created:
+            otp = random.randint(1000, 9999)
+            success = send_otp_via_email(data.get('email'), otp)
+            if success:
+                obj = User.objects.filter(email=data.get('email'))
+                obj.update(otp=otp)
+                obj.update(otp_expire=False)
                 return Response({
-                    'status': 205,
-                    'message': "Your account has been already exist!!"
+                    'status': 200,
+                    'message': 'OTP has been successfully send. Please check your email for verify!!'
                 })
-            if user_obj.is_verified:
-                return Response({
-                    'status': 204,
-                    'message': "Your email id already verified. You con't send otp!!"
-                })
-            if user_obj.otp_expire:
-                otp = random.randint(1000, 9999)
-                success = send_otp_via_email(data.get('email'), otp)
-                if success:
-                    obj = User.objects.filter(email=data.get('email'))
-                    obj.update(otp=otp)
-                    obj.update(otp_expire=False)
-                    return Response({
-                        'status': 200,
-                        'message': 'OTP has been successfully send. Please check your email for verify!!'
-                    })
-                return Response({
-                    'status': 202,
-                    'message': 'Something went wrong!!'
-                })
+            return Response({
+                'status': 202,
+                'message': 'Something went wrong!!'
+            })
         serializer = SendOTPSerializer(data=data)
         if serializer.is_valid():
             otp = random.randint(1000, 9999)
@@ -197,5 +186,37 @@ class UpdateProfileAPIView(APIView):
             })
 
 class ForgetPasswordAPIView(APIView):
-    def put(self, request, pk):
-        pass 
+    def post(self, request):
+        data = request.data
+        if User.objects.filter(email=data.get('email')).first() is None:
+            return Response({
+                'status':202,
+                'message': 'Email ID is wrong!!'
+            })
+        if User.objects.filter(otp=data.get('otp')).first() is None:
+            return Response({
+                'status':203,
+                'message': 'OTP is wrong!!'
+            })
+        obj = User.objects.filter(email=data.get('email'), otp=data.get('otp')).first()
+        if obj.otp_expire:
+            return Response({
+                'status': 205,
+                'message': 'Your otp has been expired!!'
+            })
+        if obj.is_created:
+            reset = User.objects.filter(email=data.get('email'))
+            obj.set_password(data.get('password'))
+            obj.save()
+            reset.update(otp_expire=True)
+            return Response({
+                'status':200,
+                'message': 'Your password successfully changed!!'
+            })
+        return Response({
+            'status':200,
+            'message': "Your account isn't available!!"
+        })
+
+        
+            

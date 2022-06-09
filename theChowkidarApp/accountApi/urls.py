@@ -10,5 +10,6 @@ urlpatterns = [
     path('register-via-phone/', views.RegisterVaiPhoneAPIView.as_view()),
     path('login-via-phone/', views.LoginVaiPhoneAPIView.as_view()),
     path('update-profile/<int:pk>/', views.UpdateProfileAPIView.as_view()),
+    path('forget-password/', views.ForgetPasswordAPIView.as_view()),
 ]
 
